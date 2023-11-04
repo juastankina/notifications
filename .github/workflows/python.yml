@@ -1,0 +1,67 @@
+name: Python application
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 3
+      matrix:
+        python-version: [3.10.x, 3.11]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8
+        if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+        
+    - name: wemake
+      if: always()
+      run: flake8 .
+    
+    - name: mypy
+      if: always()
+      run: mypy .
+
+    - name: Archive wemake lint results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: wemake-report
+        path: lint_reports/
+   
+  notify:
+  
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+     - name: notifyTelegram
+       uses: appleboy/telegram-action@master
+       with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: |
+            ${{ github.actor }} made ${{ github.event_name }}:
+            Commit message: ${{ github.event.commits[0].message }}
+      
+            Repository: ${{ github.repository }}
+            
+            See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
+
+            # Finished {"with error"|"successfully"}!
+            # {if error}
+            # {name of step} failed
+            # {endif} 
