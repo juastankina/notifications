@@ -1,8 +1,11 @@
 import asyncio
+import logging
 
 import websockets
 
 CLIENTS = set()
+
+logging.basicConfig(level=logging.INFO)
 
 
 class Messages:
@@ -40,6 +43,7 @@ class WSServer:
         self.messages.messages.clear()
 
     async def ws_handler(self, websocket: websockets.WebSocketServerProtocol, path: str) -> None:
+        logging.info('Установление соединения')
         await self.init(websocket)
         try:
             await self.produce()
@@ -49,11 +53,12 @@ class WSServer:
 
 if __name__ == '__main__':
 
+    logging.info('Запуск websocket-сервера')
     server = WSServer()
-    ws_server = websockets.serve(server.ws_handler, "localhost", 8765)
+    start_server = websockets.serve(server.ws_handler, "localhost", 8765)
     loop = asyncio.get_event_loop()
     try:
-        loop.run_until_complete(ws_server)
+        loop.run_until_complete(start_server)
         loop.run_forever()
     except KeyboardInterrupt:
         pass
