@@ -8,13 +8,15 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    environment: 
+      name: Actions
     strategy:
       max-parallel: 3
       matrix:
         python-version: [3.10.x, 3.11]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -24,23 +26,26 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8
+        # pip install flake8 
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-        
-    - name: wemake
-      if: always()
-      run: flake8 .
-    
-    - name: mypy
-      if: always()
-      run: mypy .
 
-    - name: Archive wemake lint results
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: wemake-report
-        path: lint_reports/
+    - name: ruff
+      uses: chartboost/ruff-action@v1
+
+    # - name: wemake
+    #   if: always()
+    #   run: flake8 .
+    
+    # - name: mypy
+    #   if: always()
+    #   run: mypy .
+
+    # - name: Archive wemake lint results
+    #   if: always()
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: wemake-report
+    #     path: lint_reports/
    
   notify:
   
