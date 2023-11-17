@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+
+  rabbitmq:
+    container_name: rabbitmq_notifications
+    image: rabbitmq:3.12-management
+    env_file:
+      - deploy/.env
+    environment:
+      - RABBITMQ_PEER_DISCOVERY_BACKEND=rabbit_peer_discovery_classic_config
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+#  postgres:
+#    container_name: postgres_notifications
+#    image: postgres:14.9
+#    env_file:
+#      - deploy/.env
+#    restart: unless-stopped
+#    volumes:
+#      - ./db:/var/lib/postgresql/data/
+#    healthcheck:
+#      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#    ports:
+#      - "5432:5432"
