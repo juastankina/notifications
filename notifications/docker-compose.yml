@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+
+  app:
+    container_name: notification_api
+    restart: unless-stopped
+    image: notification_image
+    build:
+      context: .
+    networks:
+      - backend
+    ports:
+      - "80:8000"
+
+networks:
+  backend:
+    external: true
