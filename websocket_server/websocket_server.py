@@ -22,7 +22,6 @@ class Messages:
 
 
 class WSServer:
-
     def __init__(self):
         self.messages: Messages = Messages()
 
@@ -30,19 +29,22 @@ class WSServer:
         CLIENTS.add(websocket)
 
     async def disconnect(self, websocket: websockets.WebSocketServerProtocol) -> None:
-
         CLIENTS.remove(websocket)
 
     async def send_message(self, message: str):
         if CLIENTS:
-            await asyncio.wait([asyncio.create_task(client.send(message)) for client in CLIENTS])
+            await asyncio.wait(
+                [asyncio.create_task(client.send(message)) for client in CLIENTS]
+            )
 
     async def produce(self) -> None:
         for message in self.messages.get_messages():
             await self.send_message(message)
         self.messages.messages.clear()
 
-    async def ws_handler(self, websocket: websockets.WebSocketServerProtocol, path: str) -> None:
+    async def ws_handler(
+        self, websocket: websockets.WebSocketServerProtocol, path: str
+    ) -> None:
         logging.info('Установление соединения')
         await self.init(websocket)
         try:
@@ -52,10 +54,9 @@ class WSServer:
 
 
 if __name__ == '__main__':
-
     logging.info('Запуск websocket-сервера')
     server = WSServer()
-    start_server = websockets.serve(server.ws_handler, "localhost", 8765)
+    start_server = websockets.serve(server.ws_handler, 'localhost', 8765)
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(start_server)
