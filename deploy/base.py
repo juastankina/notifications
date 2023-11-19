@@ -25,8 +25,13 @@ class Settings(BaseSettings):
 
     USER_REGISTERED_EMAIL_QUEUE: str = 'email.user-registered'
     NOTIFICATION_EMAIL_QUEUE: str = 'email.notification'
+    LIKES_EMAIL_QUEUE: str = 'email.new_likes'
 
-    QUEUES: list = [USER_REGISTERED_EMAIL_QUEUE, NOTIFICATION_EMAIL_QUEUE]
+    QUEUES: list = [
+        USER_REGISTERED_EMAIL_QUEUE,
+        NOTIFICATION_EMAIL_QUEUE,
+        LIKES_EMAIL_QUEUE,
+    ]
 
     class Config:
         env_file = '.env'

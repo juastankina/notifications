@@ -119,3 +119,21 @@ class UserRegisteredMessage(Message):
             'image': 'https://pictures.s3.yandex.net:443/resources/news_1682073799.jpeg',
         }
         super().send_message(data)
+
+
+class NewLikesMessage(Message):
+    template = Templates.NEW_LETTER
+    subject = 'У вас новые лайки'
+
+    def __init__(self, to_email: list[str]):
+        super().__init__(
+            to_email=to_email, template=self.template, subject=self.subject
+        )
+
+    def send_message(self, counter: str):
+        data = {
+            'title': 'У вас появились новые лайки',
+            'text': f'У вас {counter} новых лайков',
+            'image': 'https://pictures.s3.yandex.net:443/resources/news_1682073799.jpeg',
+        }
+        super().send_message(data)
