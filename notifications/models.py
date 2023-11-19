@@ -10,3 +10,9 @@ class UserRegistered(BaseModel):
 class Notification(BaseModel):
     title: str
     text: str
+
+
+class Like(BaseModel):
+    user_id: str
+    email: str
+    likes_counter: int

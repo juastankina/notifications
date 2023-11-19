@@ -18,5 +18,5 @@ sudo python -m smtpd -n -c DebuggingServer localhost:25
 
 Запуск воркера-обработчика
 ```bash
-python worker/reciever.py
+python worker/receiver.py
 ```

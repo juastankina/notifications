@@ -4,7 +4,7 @@ from functools import lru_cache
 from aio_pika import DeliveryMode, ExchangeType, connect, Message
 
 from config import settings
-from models import Notification, UserRegistered
+from models import Like, Notification, UserRegistered
 
 
 class SenderClient:
@@ -78,6 +78,13 @@ class NotificationMessage(BaseMessage):
         super().__init__(message_body=message_body)
 
 
+class LikeMessage(BaseMessage):
+    routing_key = settings.LIKES_EMAIL_QUEUE
+
+    def __init__(self, message_body: dict):
+        super().__init__(message_body=message_body)
+
+
 class SendMessageService:
     @staticmethod
     async def send_user_registered_message(user: UserRegistered):
@@ -88,6 +95,11 @@ class SendMessageService:
     async def send_notification_message(notification: Notification):
         notification_message = NotificationMessage(notification.model_dump())
         await notification_message.send()
+
+    @staticmethod
+    async def send_new_likes_message(like: Like):
+        message = LikeMessage(like.model_dump())
+        await message.send()
 
 
 sender_service = SendMessageService()

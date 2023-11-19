@@ -6,7 +6,11 @@ import orjson
 from aio_pika import ExchangeType, connect
 from aio_pika.abc import AbstractIncomingMessage
 
-from clients.email_client.email_messages import NewMessage, UserRegisteredMessage
+from clients.email_client.email_messages import (
+    NewLikesMessage,
+    NewMessage,
+    UserRegisteredMessage,
+)
 from deploy.base import settings
 
 email_filter = re.compile(r'(^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$')
@@ -39,7 +43,22 @@ async def handle_register_user_message(
             return
         # UserRegisteredMessage(to_email=[email]).send_message(link=data['tiny_url'])
         UserRegisteredMessage(to_email=['yu.astankina@yandex.ru']).send_message(
-            link=data['tiny_url']
+            link=data['tiny_url'],
+        )
+        await asyncio.sleep(1)
+
+
+async def handle_new_like_message(
+    message: AbstractIncomingMessage,
+):
+    async with message.process():
+        data = orjson.loads(message.body)
+        email = data.get('email')
+        if not check_email(email):
+            return
+        # UserRegisteredMessage(to_email=[email]).send_message(link=data['tiny_url'])
+        NewLikesMessage(to_email=['yu.astankina@yandex.ru']).send_message(
+            counter=data['likes_counter'],
         )
         await asyncio.sleep(1)
 
@@ -68,14 +87,22 @@ async def start():
     await channel.set_qos(prefetch_count=1)
 
     user_registered_queue = await register_queue(
-        channel, settings.USER_REGISTERED_EMAIL_QUEUE
+        channel,
+        settings.USER_REGISTERED_EMAIL_QUEUE,
     )
     notifications_queue = await register_queue(
-        channel, settings.NOTIFICATION_EMAIL_QUEUE
+        channel,
+        settings.NOTIFICATION_EMAIL_QUEUE,
+    )
+    new_likes_queue = await register_queue(
+        channel,
+        settings.LIKES_EMAIL_QUEUE,
     )
 
     await user_registered_queue.consume(handle_register_user_message)
     await notifications_queue.consume(process_message)
+    await new_likes_queue.consume(handle_new_like_message)
+
     return connection
 
 

@@ -1,0 +1,48 @@
+version: "3.7"
+services:
+
+  rabbitmq_generator:
+    container_name: rabbitmq_generator
+    image: rabbitmq:3.12-management
+    env_file:
+      - config/.env
+    environment:
+      - RABBITMQ_PEER_DISCOVERY_BACKEND=rabbit_peer_discovery_classic_config
+    ports:
+      - "5672:5672"
+      - "15673:15672"
+    networks:
+      - backend
+
+  generator_broker:
+    container_name: generator_broker
+    restart: unless-stopped
+    image: generator_broker_image
+    build:
+      context: .
+      dockerfile: Dockerfile_generator_broker
+    networks:
+      - backend
+    depends_on:
+      - rabbitmq_generator
+    command: taskiq worker generator:broker
+    links:
+      - rabbitmq_generator
+
+
+  generator_scheduler:
+    container_name: generator_scheduler
+    restart: unless-stopped
+    image: generator_scheduler_image
+    build:
+      context: .
+      dockerfile: Dockerfile_generator_scheduler
+    networks:
+      - backend
+    depends_on:
+      - rabbitmq_generator
+    command: python3 generator.py
+
+networks:
+  backend:
+    external: true
