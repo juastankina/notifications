@@ -1,4 +1,12 @@
+from enum import Enum
+
 from pydantic_settings import BaseSettings
+
+
+class DeliveryTypeEnum(str, Enum):
+    email = 'email'
+    sms = 'sms'
+    websocket = 'websocket'
 
 
 class Settings(BaseSettings):
@@ -27,11 +35,19 @@ class Settings(BaseSettings):
     NOTIFICATION_EMAIL_QUEUE: str = 'email.notification'
     LIKES_EMAIL_QUEUE: str = 'email.new_likes'
 
+    USER_NOTIFY_QUEUE: str = 'user_notify'
+
     QUEUES: list = [
         USER_REGISTERED_EMAIL_QUEUE,
         NOTIFICATION_EMAIL_QUEUE,
         LIKES_EMAIL_QUEUE,
+        f'{DeliveryTypeEnum.email.value}.{USER_NOTIFY_QUEUE}',
+        f'{DeliveryTypeEnum.sms.value}.{USER_NOTIFY_QUEUE}',
+        f'{DeliveryTypeEnum.websocket.value}.{USER_NOTIFY_QUEUE}',
     ]
+
+    AUTH_API_URL: str = 'http://auth-app:5000'
+    AUTH_API_GET_USER_ENDPOINT: str = '/api/v1/auth/user'
 
     class Config:
         env_file = '.env'

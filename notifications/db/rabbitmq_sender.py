@@ -4,7 +4,13 @@ from functools import lru_cache
 from aio_pika import DeliveryMode, ExchangeType, connect, Message
 
 from config import settings
-from models import Like, Notification, UserRegistered
+from models import (
+    DeliveryTypeEnum,
+    Like,
+    Notification,
+    SendUserNotification,
+    UserRegistered,
+)
 
 
 class SenderClient:
@@ -56,7 +62,6 @@ class BaseMessage:
     async def send(self):
         message = Message(
             json.dumps(self.message_body, indent=2).encode('utf-8'),
-            # bytes(self.message_body, 'utf-8'),
             delivery_mode=self.delivery_mode,
         )
         await self.sender.send(self.routing_key, message)
@@ -85,6 +90,13 @@ class LikeMessage(BaseMessage):
         super().__init__(message_body=message_body)
 
 
+class UserNotifyMessage(BaseMessage):
+    def __init__(self, notification_type: DeliveryTypeEnum, message_body: dict):
+        self.routing_key = f'{notification_type.value}.{settings.USER_NOTIFY_QUEUE}'
+
+        super().__init__(message_body=message_body)
+
+
 class SendMessageService:
     @staticmethod
     async def send_user_registered_message(user: UserRegistered):
@@ -100,6 +112,15 @@ class SendMessageService:
     async def send_new_likes_message(like: Like):
         message = LikeMessage(like.model_dump())
         await message.send()
+
+    @staticmethod
+    async def send_notify_user_message(
+        delivery_type: DeliveryTypeEnum, send_user_notification: SendUserNotification
+    ):
+        notification_message = UserNotifyMessage(
+            delivery_type, send_user_notification.model_dump()
+        )
+        await notification_message.send()
 
 
 sender_service = SendMessageService()
