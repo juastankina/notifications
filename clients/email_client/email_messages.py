@@ -10,7 +10,7 @@ from clients.email_client.email_client import email_client, EmailClient
 
 
 class Templates(enum.Enum):
-    NEW_LETTER = 'mail.html'
+    NEW_LETTER = '/templates/mail.html'
 
 
 class Message:

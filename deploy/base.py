@@ -45,9 +45,25 @@ class EmailConfig(BaseSettings):
     smtp_host: str = 'smtp.yandex.ru'
     smtp_port: int = 465
 
+    is_dev: bool = False
+
     class Config:
         env_file = '.env'
 
 
+class EmailConfigDev(EmailConfig):
+    email_login: str = 'yu.astankina'
+    email_password: str
+
+    domain: str = 'yandex.ru'
+    smtp_host: str = 'localhost'
+    smtp_port: int = 1025
+
+    is_dev: bool = True
+
+    class Config:
+        env_file = '.env.local'
+
+
 settings = Settings()
-email_config = EmailConfig()
+email_config = EmailConfigDev()
