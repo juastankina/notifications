@@ -7,6 +7,7 @@ class EmailClient:
     _domain = email_config.domain
     _smtp_host = email_config.smtp_host
     _smtp_port = email_config.smtp_port
+    _is_dev = email_config.is_dev
 
     def __init__(
         self,
@@ -23,9 +24,12 @@ class EmailClient:
         self.smtp_port = smtp_port or self._smtp_port
 
         self.from_email = f'{self.server_login}@{self.domain}'
-        self.server = self.login()
+        self.server = self.set_server()
 
-    def login(self):
+    def set_server(self):
+        if self._is_dev:
+            return smtplib.SMTP(self.smtp_host, self.smtp_port)
+
         server = smtplib.SMTP_SSL(self.smtp_host, self.smtp_port)
         server.login(self.server_login, self.password)
         return server

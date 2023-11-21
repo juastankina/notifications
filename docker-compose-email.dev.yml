@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+
+  mail_notifications:
+    image: mailhog/mailhog
+    container_name: mail_notifications
+    hostname: mail_notifications
+    logging:
+      driver: 'none'
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
