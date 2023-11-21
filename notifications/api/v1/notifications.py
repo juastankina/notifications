@@ -2,8 +2,15 @@ import logging
 
 from fastapi import APIRouter, Depends
 
+from client.auth_api import get_user
 from db.rabbitmq_sender import get_sender_service, SendMessageService
-from models import Like, Notification, UserRegistered
+from models import (
+    Like,
+    Notification,
+    SendUserNotification,
+    UserNotification,
+    UserRegistered,
+)
 
 log = logging.getLogger(__name__)
 
@@ -50,3 +57,23 @@ async def likes_notify(
     await sender.send_new_likes_message(like)
 
     log.info('New like notification request send')
+
+
+@router.post(
+    '/notify_user',
+    response_model=None,
+    name='Отправить нотификацию клиенту с текстом в указанный в запросе канал',
+)
+async def notify_user(
+    notification: UserNotification,
+    sender: SendMessageService = Depends(get_sender_service),
+):
+    user_info = get_user(notification.user_id)
+    await sender.send_notify_user_message(
+        notification.delivery_type,
+        SendUserNotification(**user_info.model_dump(), text=notification.text),
+    )
+
+    log.info(
+        f'Notification request send {notification.title}, user={notification.user_id}'
+    )
