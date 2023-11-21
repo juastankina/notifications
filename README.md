@@ -13,7 +13,7 @@
 
 Запуск локального почтового сервера:
 ```bash
-sudo python -m smtpd -n -c DebuggingServer localhost:25 
+docker-compose -f docker-compose-email.yml up -d
 ```
 
 Запуск воркера-обработчика
