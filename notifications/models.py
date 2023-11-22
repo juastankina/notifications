@@ -21,6 +21,13 @@ class UserNotification(BaseModel):
     delivery_type: DeliveryTypeEnum
 
 
+class UsersNotification(BaseModel):
+    users: list[str]
+    title: str
+    text: str
+    delivery_type: DeliveryTypeEnum
+
+
 class UserInfo(BaseModel):
     user_id: str
     email: str
