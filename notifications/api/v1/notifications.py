@@ -10,6 +10,7 @@ from models import (
     SendUserNotification,
     UserNotification,
     UserRegistered,
+    UsersNotification,
 )
 
 log = logging.getLogger(__name__)
@@ -77,3 +78,22 @@ async def notify_user(
     log.info(
         f'Notification request send {notification.title}, user={notification.user_id}'
     )
+
+
+@router.post(
+    '/notify_users',
+    response_model=None,
+    name='Отправить нотификацию списку клиентов с текстом в указанный в запросе канал',
+)
+async def notify_users(
+    notifications: UsersNotification,
+    sender: SendMessageService = Depends(get_sender_service),
+):
+    for user_id in notifications.users:
+        user_info = get_user(user_id)
+        await sender.send_notify_user_message(
+            notifications.delivery_type,
+            SendUserNotification(**user_info.model_dump(), text=notifications.text),
+        )
+
+    log.info(f'Notification request send {notifications.title}')
